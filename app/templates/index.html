@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Resume Tailor</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { font-family: Arial, sans-serif; max-width: 1100px; margin: 2rem auto; padding: 1rem; line-height: 1.5; background: #f9f9f9; }
+      h1 { margin-bottom: 0.25rem; }
+      .grid { display: grid; gap: 1rem; }
+      textarea, select, button { width: 100%; padding: 0.75rem; font: inherit; border: 1px solid #ccc; border-radius: 6px; }
+      textarea { min-height: 160px; resize: vertical; background: #fff; }
+      button { background: #1a73e8; color: #fff; font-weight: bold; border: none; cursor: pointer; border-radius: 6px; padding: 0.85rem; }
+      button:hover { background: #1558c0; }
+      .card { border: 1px solid #ddd; padding: 1rem; border-radius: 10px; background: #fff; }
+      .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+      pre { white-space: pre-wrap; background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 10px; overflow-x: auto; font-size: 0.85rem; }
+      .error { background: #fff0f0; border: 1px solid #f44; color: #900; padding: 1rem; border-radius: 8px; }
+      label { font-weight: 600; display: block; margin-bottom: 0.3rem; }
+      .hint { font-size: 0.82rem; color: #666; margin-top: 0.3rem; }
+      .copy-btn { width: auto; padding: 0.5rem 1rem; background: #555; margin-top: 0.5rem; font-size: 0.85rem; }
+      .copy-btn:hover { background: #333; }
+    </style>
+  </head>
+  <body>
+    <h1>Resume Tailor</h1>
+    <p>Paste a job description, your resume, and optional instructions. Choose the format and click Generate.</p>
+
+    <form class="grid" method="post" action="/tailor-form">
+      <div class="card">
+        <label for="jd">Job Description</label>
+        <textarea id="jd" name="jd" placeholder="Paste the full JD here">{{ jd or "" }}</textarea>
+      </div>
+
+      <div class="card">
+        <label for="resume_code">Resume</label>
+        <textarea id="resume_code" name="resume_code" rows="14" placeholder="Paste your LaTeX or Word/plain text resume here">{{ resume_code or "" }}</textarea>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <label for="additional_information">Additional Instructions (optional)</label>
+          <textarea id="additional_information" name="additional_information" rows="5"
+            placeholder="e.g. Emphasise AI and prompt engineering. Highlight leadership roles.">{{ additional_information or "" }}</textarea>
+        </div>
+        <div class="card">
+          <label for="format">Format</label>
+          <select id="format" name="format">
+            <option value="latex" {% if format == "latex" or not format %}selected{% endif %}>LaTeX (Overleaf)</option>
+            <option value="word" {% if format == "word" %}selected{% endif %}>Word / Plain text</option>
+          </select>
+          <p class="hint">Input and output will both use the selected format.</p>
+          <button type="submit">⚡ Generate Tailored Resume</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="card" style="margin-top: 1.5rem;">
+      <h2>Output</h2>
+      {% if error %}
+        <div class="error"><strong>Error:</strong> {{ error }}</div>
+      {% elif result %}
+        <button class="copy-btn" onclick="copyOutput()">Copy to clipboard</button>
+        <pre id="output-code">{{ result.tailored_code }}</pre>
+      {% else %}
+        <p style="color:#888;">No output yet. Fill in the fields above and click Generate.</p>
+      {% endif %}
+    </div>
+
+    <script>
+      function copyOutput() {
+        const text = document.getElementById("output-code").innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.querySelector(".copy-btn");
+          btn.textContent = "Copied!";
+          setTimeout(() => { btn.textContent = "Copy to clipboard"; }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>
